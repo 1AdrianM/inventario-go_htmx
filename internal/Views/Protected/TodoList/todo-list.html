@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin 2 - Tables</title>
+
+    <!-- Custom fonts for this template -->
+    <link href="/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <script src="/assets/css/todo-list.css"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Custom styles for this page -->
+    <link href="/assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+<style>
+    body{
+    
+        background: #f8f8f8;
+    }
+    
+    .todo-nav {
+        margin-top: 10px
+    }
+    
+    .todo-list {
+        margin: 10px 0
+    }
+    
+    .todo-list .todo-item {
+        padding: 15px;
+        margin: 5px 0;
+        border-radius: 0;
+        background: #f7f7f7
+    }
+    
+    .todo-list.only-active .todo-item.complete {
+        display: none
+    }
+    
+    .todo-list.only-active .todo-item:not(.complete) {
+        display: block
+    }
+    
+    .todo-list.only-complete .todo-item:not(.complete) {
+        display: none
+    }
+    
+    .todo-list.only-complete .todo-item.complete {
+        display: block
+    }
+    
+    .todo-list .todo-item.complete span {
+        text-decoration: line-through
+    }
+    
+    .remove-todo-item {
+        color: #ccc;
+        visibility: hidden
+    }
+    
+    .remove-todo-item:hover {
+        color: #5f5f5f
+    }
+    
+    .todo-item:hover .remove-todo-item {
+        visibility: visible
+    }
+    
+    div.checker {
+        width: 18px;
+        height: 18px
+    }
+    
+    div.checker input,
+    div.checker span {
+        width: 18px;
+        height: 18px
+    }
+    
+    div.checker span {
+        display: -moz-inline-box;
+        display: inline-block;
+        zoom: 1;
+        text-align: center;
+        background-position: 0 -260px;
+    }
+    
+    div.checker, div.checker input, div.checker span {
+        width: 19px;
+        height: 19px;
+    }
+    
+    div.checker, div.radio, div.uploader {
+        position: relative;
+    }
+    
+    div.button, div.button *, div.checker, div.checker *, div.radio, div.radio *, div.selector, div.selector *, div.uploader, div.uploader * {
+        margin: 0;
+        padding: 0;
+    }
+    
+    div.button, div.checker, div.radio, div.selector, div.uploader {
+        display: -moz-inline-box;
+        display: inline-block;
+        zoom: 1;
+        vertical-align: middle;
+    }
+    
+    .card {
+        padding: 25px;
+        margin-bottom: 20px;
+        border: initial;
+        background: #fff;
+        border-radius: calc(.15rem - 1px);
+        box-shadow: 0 1px 15px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.04);
+    }
+    .modal-backdrop {
+        background-color: black; /* Fondo oscuro con menos opacidad */
+    }
+       /* Cambiar el fondo del contenido del modal */
+       .modal-content {
+        background-color: white; /* Fondo blanco para el contenido del modal */
+    }
+    
+    /* Personalización adicional para el header del modal */
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .icon-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 15px;
+        border: 2px solid #007bff;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    
+    .icon-button i {
+        margin-right: 8px; /* Add some space between the icon and the text */
+    }
+    
+    .icon-button:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px); /* Slight hover effect */
+    }
+    .custom-modal-size {
+        max-width: 90%; /* You can set this to any percentage or fixed value (e.g., px) */
+        width: 80%;
+        height:50%;
+    }
+</style>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+         <!-- Sidebar -->
+         <div hx-get="navbar" hx-trigger="load" hx-target="#navbar-container">
+            <div id="navbar-container"></div> 
+         </div>
+
+          <!-- End of Sidebar -->
+ 
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <form class="form-inline">
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                    </form>
+ 
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                        <li class="nav-item dropdown no-arrow d-sm-none">
+                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-search fa-fw"></i>
+                            </a>
+                           
+                        </li>
+
+                         
+                         
+ 
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"> </span>
+
+                                <img class="img-profile rounded-circle"
+                                    src="/assets/img/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Settings
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Activity Log
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+<!-- TODO LIST COMPONENT-->
+ 
+
+<!-- div id="todo-list-component" class="todo-list-component" hx-get="/todoListComponent"hx-trigger="load" hx-target="#todo-list-component"></div>--> 
+         
+<div class="container" >
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-white">
+                <div class="card-body">
+                    <form action="">
+                        <input id="todoListInput" type="text" class="form-control add-task" placeholder="New Task...">
+                    </form>
+                    <ul class="nav nav-pills todo-nav">
+                        <li role="presentation" class="nav-item all-task active"><a href="#" class="nav-link">All</a></li>
+                        <li role="presentation" class="nav-item active-task"><a href="#" class="nav-link">Active</a></li>
+                        <li role="presentation" class="nav-item completed-task"><a href="#" class="nav-link">Completed</a></li>
+                    </ul>
+                    {{ range .Task}} 
+                    <div class="todo-list">
+                         <div hx-get="edit/task/{{ .ID}}" 
+                         hx-trigger="click"
+                         data-target="#edit-modal"
+                          hx-target="#edit-modal .modal-body"
+                           id="title-input" 
+                           hx-swap="outerHTML"
+
+                           class="todo-item">
+                            <div class="checker">
+                                <span class="">
+                                    <input id="title-input" for ="title" type="checkbox">
+                                </span>
+                            </div>
+                            <span> {{ .Title}} </span>
+                            <a href="javascript:void(0);" class="float-right remove-todo-item"><i class="icon-close"></i></a>
+                        </div> {{ end }}
+                    </div>
+                </div> 
+             
+            </div>   
+        </div>
+    </div>
+</div>
+
+<!-- end of TODO LIST COMPONENT-->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Your Website 2020</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--FORM MODAL FOR TODO LIST-->
+
+    <div class="modal fade" id="todo-list-modal" data-user_id="0" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="user_modal_title" aria-hidden="true">
+        <div class="modal-dialog custom-modal-size modal-lg modal-notify modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title white-text" id="import_modal_title">Agregar Tarea</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true" class="white-text">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+              <form hx-post="create/task"  hx-swap="beforeend" id="todo-list-form" class="needs-validation container" novalidate>
+                
+                <div class="form-row">
+                  <div class="col">
+
+                    <label for="" class="form-label">Titulo</label>
+                     <input type="text" class="form-control" id="Title" name="Title" placeholder="Ingrese su nueva tarea aqui" required>                 
+                     <label for="" class="form-label">Descripcion</label>
+
+                     <textarea  class="form-control" id="Text" name="Text" placeholder="Descripcion" required>
+                     </textarea> 
+                  </div>
+                </div>
+      
+                <button type="submit" class="icon-button">
+                    <i class="fa-solid fa-square-plus"></i>                   
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!--END OF MODAL-->
+
+    <div class="modal fade" id="edit-modal" data-user_id="0" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="user_modal_title" aria-hidden="true">
+        <div class="modal-dialog custom-modal-size modal-lg modal-notify modal-info" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title white-text" id="import_modal_title">Tarea</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true" class="white-text">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+              <form id="todo-list-form" class="needs-validation container" novalidate>
+                
+                <div class="form-row">
+                  <div class="col">
+
+                    <label for="" class="form-label">Titulo</label>
+                     <input type="text" class="form-control" id="Title" name="Title" placeholder="Ingrese su nueva tarea aqui" required>                 
+                     <label for="" class="form-label">Descripcion</label>
+
+                     <textarea  class="form-control" id="Text" name="Text" placeholder="Descripcion" required>
+                     </textarea> 
+                  </div>
+                </div>
+      
+                <button type="submit" class="icon-button">
+                    <i class="fa-solid fa-square-plus"></i>                   
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!--END OF MODAL-->
+          <!-- Bootstrap core JavaScript-->
+          <script src="/assets/vendor/jquery/jquery.min.js"></script>
+          <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+      
+          <!-- Core plugin JavaScript-->
+          <script src="/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+      
+          <!-- Custom scripts for all pages-->
+          <script src="/assets/js/sb-admin-2.min.js"></script>
+          <script src="/assets/js/todo-list.js"></script>
+      
+          <!-- Page level plugins -->
+          <script src="/assets/vendor/chart.js/Chart.min.js"></script>
+      
+          <!-- Page level custom scripts -->
+          <script src="/assets/js/demo/chart-area-demo.js"></script>
+          <script src="/assets/js/demo/chart-pie-demo.js"></script>
+ 
+<script>
+    $( document ).ready(function() {
+    
+        "use strict";
+        
+        var todo = function() { 
+            $('.todo-list .todo-item input').click(function() {
+            if($(this).is(':checked')) {
+                $(this).parent().parent().parent().toggleClass('complete');
+            } else {
+                $(this).parent().parent().parent().toggleClass('complete');
+            }
+        });
+        
+        $('.todo-nav .all-task').click(function() {
+            $('.todo-list').removeClass('only-active');
+            $('.todo-list').removeClass('only-complete');
+            $('.todo-nav li.active').removeClass('active');
+            $(this).addClass('active');
+        });
+        
+        $('.todo-nav .active-task').click(function() {
+            $('.todo-list').removeClass('only-complete');
+            $('.todo-list').addClass('only-active');
+            $('.todo-nav li.active').removeClass('active');
+            $(this).addClass('active');
+        });
+        
+        $('.todo-nav .completed-task').click(function() {
+            $('.todo-list').removeClass('only-active');
+            $('.todo-list').addClass('only-complete');
+            $('.todo-nav li.active').removeClass('active');
+            $(this).addClass('active');
+        });
+        
+        $('#uniform-all-complete input').click(function() {
+            if($(this).is(':checked')) {
+                $('.todo-item .checker span:not(.checked) input').click();
+            } else {
+                $('.todo-item .checker span.checked input').click();
+            }
+        });
+        
+        $('.remove-todo-item').click(function() {
+            $(this).parent().remove();
+        });
+        };
+        
+        todo();
+    }); 
+
+    document.addEventListener("DOMContentLoaded",()=>{
+        const input = document.getElementById('todoListInput');
+       const tappedInput = document.getElementById("title-input")
+       input.addEventListener("click", (event)=>{
+       if(event.target.id=="todoListInput"){
+       const modal = new bootstrap.Modal(document.getElementById('todo-list-modal'));
+       modal.show();    
+       
+       }})
+       
+       input.addEventListener("click", (event)=>{
+        if(event.target.id=="title-input"){
+        const modal1 = new bootstrap.Modal(document.getElementById('edit-modal'));
+        modal1.show();    
+        
+        }})
+    
+           })
+</script>
+</body>
+
+</html>

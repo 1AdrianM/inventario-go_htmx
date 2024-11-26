@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin 2 - Tables</title>
+
+    <!-- Custom fonts for this template -->
+    <link href="/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.all.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+
+    <!-- Custom styles for this page -->
+    <link href="/assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<style>
+    .no-fluid-padding {
+        padding: 0; /* Nullifies the padding */
+        max-width: none; /* Removes max-width inherited from container-fluid */
+        width: 100%; /* Set it to 100% width to behave like a full-width element */
+      }
+</style>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div hx-get="navbar" hx-trigger="load" hx-target="#navbar-container">
+            <div id="navbar-container"></div> 
+         </div>
+
+        <!-- End of Sidebar -->
+         <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <form class="form-inline">
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                    </form>
+
+                    <!-- Topbar Search -->
+                    <form
+                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
+                                aria-label="Search" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                      
+                      
+                             
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                     <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{.Name}} {{.Lastname}} </span>
+
+                                <img class="img-profile rounded-circle"
+                                    src="/assets/img/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Settings
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Activity Log
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-2 text-gray-800">Tabla de Mediciones</h1>
+                    <div class="">
+                        <a href="javascript:void(0)" id="new_user" data-toggle="modal" data-target="#user_modal" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mb-3">
+                            <i class="fas fa-plus fa-sm text-white-50"></i> Añadir datos
+                        </a>
+                        <button hx-get="create/excel" hx-trigger="click" hx-headers='{"Content-Type": "application/json"}' id="ExcelBtn" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mb-3">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Generar Excel
+                        </button>
+                        <a href="javascript:void(0)" id="ImportBtn" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm mb-3">
+                            <i class="fas fa-file-import fa-sm text-white-50"></i> Importar Excel
+                        </a>
+                    </div>
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Listado de Datos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha de Mantenimiento</th>
+                                            <th>Ubicación</th>
+                                            <th>Tag</th>
+                                            <th>KW</th>
+                                            <th>RPM</th>
+                                            <th>Bearing D</th>
+                                            <th>Bearing T</th>
+                                            <th>Bearing A</th>
+                                            <th>Actions</th>
+                                           
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{ range .Mediciones }}
+                                        <tr>
+                                            <td>{{ .Fecha_mantenimiento }}</td>
+                                            <td>{{ .Motor_ubicacion }}</td>
+                                            <td>{{ .Motor_tag }}</td>
+                                            <td>{{ .Motor_KW }}</td>
+                                            <td>{{ .Motor_RPM }}</td>
+                                            <td>{{ .Bearing_d }}</td>
+                                            <td>{{ .Bearing_t }}</td>
+                                            <td>{{ .Bearing_a }}</td>
+ 
+ <td> 
+<div style=""> 
+    <button 
+    hx-get="LoadUserData/{{.ID}}"
+    href="javascript:void(0)" 
+    id="UpdateBtn"
+ 
+    data-toggle="modal" 
+    data-target="#Updateuser_modal" 
+    hx-target="#Updateuser_modal .modal-body" 
+hx-swap="outerHTML"
+    class="bg-info">
+    <i class="fas fa-edit"></i>
+    </button>
+
+    <button hx-delete="delete/mediciones/{{ .ID}}" 
+                hx-swap="outerHTML" 
+                hx-target="#dataTable" 
+                class="bg-danger" 
+                data-id="{{ .ID}}" 
+                onclick="confirmDelete(event)">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+</div>
+         </td>
+
+                                        </tr>
+                                        {{ end }}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Your Website 2020</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+ <!-- Modal Structure (hidden by default) -->
+ <div class="modal fade" id="user_modal" data-user_id="0" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="user_modal_title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-notify modal-info" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title white-text" id="user_modal_title">Crear Mediciones</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" class="white-text">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form hx-post="create/mediciones" hx-swap="beforeend"  hx-target="#dataTable" id="user_form" class="needs-validation container" novalidate>
+            
+            <div class="form-row">
+              <div class="col-md-6">
+                <label for="fechaMantenimiento" class="form-label">Fecha de Mantenimiento</label>
+                <input type="date" class="form-control" id="fechaMantenimiento" name="fechaMantenimiento" required>
+              </div>
+              <div class="col-md-6">
+                <label for="motorUbicacion" class="form-label">Motor Ubicación</label>
+                <input type="text" class="form-control" id="motorUbicacion" name="motorUbicacion" placeholder="Ubicación del motor" required>
+              </div>
+            </div>
+  
+            <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="motorTag" class="form-label">Motor Tag</label>
+                <input type="text" class="form-control" id="motorTag" name="motorTag" placeholder="Etiqueta del motor" required>
+              </div>
+              <div class="col-md-6">
+                <label for="motorKW" class="form-label">Motor KW</label>
+                <input type="number" class="form-control" id="motorKW" name="motorKW" placeholder="Potencia del motor en KW" required>
+              </div>
+            </div>
+  
+            <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="motorRPM" class="form-label">Motor RPM</label>
+                <input type="number" class="form-control" id="motorRPM" name="motorRPM" placeholder="Velocidad del motor en RPM" required>
+              </div>
+              <div class="col-md-6">
+                <label for="bearingD" class="form-label">Bearing D</label>
+                <input type="number" step="0.01" class="form-control" id="bearingD" name="bearingD" placeholder="Diámetro del rodamiento" required>
+              </div>
+            </div>
+  
+            <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="bearingT" class="form-label">Bearing T</label>
+                <input type="number" step="0.01" class="form-control" id="bearingT" name="bearingT" placeholder="Espesor del rodamiento" required>
+              </div>
+            </div> 
+             <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="bearingA" class="form-label">Bearing A</label>
+                <input type="number" step="0.01" class="form-control" id="bearingA" name="bearingA" placeholder="Espesor del rodamiento" required>
+              </div>
+            </div>
+  
+            <button type="submit" class="btn btn-primary mt-4">Crear Mediciones</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+ <!--Update Modal form-->
+
+ <div class="modal fade" id="Updateuser_modal" data-user_id="0" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="user_modal_title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-notify modal-info" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title white-text" id="user_modal_title">Update Mediciones</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" class="white-text">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form hx-put="update/mediciones{{ .ID}}" hx-swap="afterSwap" id="Updateuser_form" class="needs-validation container" novalidate>
+            
+            <div class="form-row">
+              <div class="col-md-6">
+                <label for="fechaMantenimiento" class="form-label">Fecha de Mantenimiento</label>
+                <input type="date" class="form-control" id="fechaMantenimiento" name="fechaMantenimiento" required>
+              </div>
+              <div class="col-md-6">
+                <label for="motorUbicacion" class="form-label">Motor Ubicación</label>
+                <input type="text" class="form-control" id="motorUbicacion" name="motorUbicacion" placeholder="Ubicación del motor" required>
+              </div>
+            </div>
+  
+            <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="motorTag" class="form-label">Motor Tag</label>
+                <input type="text" class="form-control" id="motorTag" name="motorTag" placeholder="Etiqueta del motor" required>
+              </div>
+              <div class="col-md-6">
+                <label for="motorKW" class="form-label">Motor KW</label>
+                <input type="number" class="form-control" id="motorKW" name="motorKW" placeholder="Potencia del motor en KW" required>
+              </div>
+            </div>
+  
+            <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="motorRPM" class="form-label">Motor RPM</label>
+                <input type="number" class="form-control" id="motorRPM" name="motorRPM" placeholder="Velocidad del motor en RPM" required>
+              </div>
+              <div class="col-md-6">
+                <label for="bearingD" class="form-label">Bearing D</label>
+                <input type="number" step="0.01" class="form-control" id="bearingD" name="bearingD" placeholder="Diámetro del rodamiento" required>
+              </div>
+            </div>
+  
+            <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="bearingT" class="form-label">Bearing T</label>
+                <input type="number" step="0.01" class="form-control" id="bearingT" name="bearingT" placeholder="Espesor del rodamiento" required>
+              </div>
+            </div>
+  
+            <button type="submit" class="btn btn-primary mt-4">Actualizar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <div class="modal fade" id="Import_modal" data-user_id="0" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="user_modal_title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-notify modal-info" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title white-text" id="import_modal_title">Importar archivo de Mediciones</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" class="white-text">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form hx-post="import/excel" hx-headers='{"Content-Type": "application/json"}'  id="import_form" class="needs-validation container" novalidate>
+            
+            <div class="form-row">
+              <div class="col-md-6">
+                <label for="fechaMantenimiento" class="form-label">Importar Excel</label>
+                <input type="file" class="form-control" id="fechaMantenimiento" name="fechaMantenimiento" required>
+              </div>
+              
+   
+    
+   
+             <div class="form-row mt-3">
+              <div class="col-md-6">
+                <label for="bearingA" class="form-label">Bearing A</label>
+                <input type="number" step="0.01" class="form-control" id="bearingA" name="bearingA" placeholder="Espesor del rodamiento" required>
+              </div>
+            </div>
+  
+            <button type="submit" class="btn btn-primary mt-4">Crear Mediciones</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const BtnExcel = document.getElementById("ExcelBtn");
+    
+        if (BtnExcel) {  // Check if the element exists
+            BtnExcel.addEventListener("click", () => {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Tu Archivo ha sido generado con exito",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            });
+        } else {
+            console.error("Excel button not found");
+        }
+    });
+  </script>
+  <script>
+
+    function confirmDelete(event) {
+        // Prevenir la acción predeterminada del botón antes de mostrar el modal de confirmación
+        event.preventDefault();
+    
+        // Obtener el ID del elemento que se quiere eliminar
+        const itemId = event.target.getAttribute("data-id");
+    
+        // Mostrar el modal de confirmación
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Si el usuario confirma, realizar la solicitud de eliminación
+                // Usamos HTMX para hacer el DELETE
+                htmx.ajax('DELETE', '/delete/mediciones/' + itemId, {
+                    swap: 'outerHTML', // Cambiar solo la fila de la tabla
+                    target: '#dataTable' // Apuntar a la tabla donde queremos hacer el swap
+                });
+    
+                Swal.fire(
+                    'Deleted!',
+                    'Your file has been deleted.',
+                    'success'
+                );
+                window.location.reload()
+            }
+        });
+    }
+  </script>
+          <!-- Bootstrap core JavaScript-->
+          <script src="/assets/vendor/jquery/jquery.min.js"></script>
+          <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+      
+          <!-- Core plugin JavaScript-->
+          <script src="/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+      
+          <!-- Custom scripts for all pages-->
+          <script src="/assets/js/sb-admin-2.min.js"></script>
+      
+       
+            
+</body>
+
+</html>
+
+
+  <!--modal Structure for Update (hidden by default)-->
